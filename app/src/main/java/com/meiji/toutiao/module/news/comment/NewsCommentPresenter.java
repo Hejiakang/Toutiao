@@ -1,6 +1,9 @@
 package com.meiji.toutiao.module.news.comment;
 
+import android.widget.Toast;
+
 import com.meiji.toutiao.ErrorAction;
+import com.meiji.toutiao.InitApp;
 import com.meiji.toutiao.api.IMobileNewsApi;
 import com.meiji.toutiao.bean.news.NewsCommentBean;
 import com.meiji.toutiao.util.RetrofitFactory;
@@ -23,10 +26,16 @@ public class NewsCommentPresenter implements INewsComment.Presenter {
     private String itemId;
     private int offset = 0;
     private List<NewsCommentBean.DataBean.CommentBean> commentsBeanList = new ArrayList<>();
+    String filterContent;
 
     public NewsCommentPresenter(INewsComment.View view) {
         this.view = view;
     }
+
+    public void setFilter(String content) {
+        filterContent = content;
+    }
+
 
     @Override
     public void doLoadData(String... groupId_ItemId) {
@@ -55,6 +64,18 @@ public class NewsCommentPresenter implements INewsComment.Presenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .as(view.bindAutoDispose())
                 .subscribe(list -> {
+
+//                    if (filterContent!=null && !"".equals(filterContent.trim())){
+//                        List<NewsCommentBean.DataBean.CommentBean> listNew = new ArrayList<>();
+//                        for (int i = 0; i < list.size(); i++) {
+//                            if (list.get(i).getText() != null) {
+//                                if (list.get(i).getText().contains(filterContent)) {
+//                                    listNew.add(list.get(i));
+//                                }
+//                            }
+//                        }
+//                        list = listNew;
+//                    }
                     if (null != list && list.size() > 0) {
                         doSetAdapter(list);
                     } else {
@@ -74,7 +95,26 @@ public class NewsCommentPresenter implements INewsComment.Presenter {
 
     @Override
     public void doSetAdapter(List<NewsCommentBean.DataBean.CommentBean> list) {
-        commentsBeanList.addAll(list);
+        if (filterContent != null && !"".equals(filterContent.trim())) {
+            List<NewsCommentBean.DataBean.CommentBean> listNew = new ArrayList<>();
+            if (list != null) {
+                for (int i = 0; i < list.size(); i++) {
+                    if (list.get(i).getText() != null) {
+                        if (list.get(i).getText().contains(filterContent)) {
+                            listNew.add(list.get(i));
+                        }
+                    }
+                }
+            }
+            if (listNew.size() == 0) {
+                Toast.makeText(InitApp.AppContext,"暂无相关内容",Toast.LENGTH_SHORT).show();
+
+            } else {
+                commentsBeanList.addAll(listNew);
+            }
+        } else {
+            commentsBeanList.addAll(list);
+        }
         view.onSetAdapter(commentsBeanList);
         view.onHideLoading();
     }

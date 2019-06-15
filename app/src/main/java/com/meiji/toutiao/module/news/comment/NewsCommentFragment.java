@@ -3,6 +3,8 @@ package com.meiji.toutiao.module.news.comment;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.meiji.toutiao.R;
 import com.meiji.toutiao.Register;
@@ -28,6 +30,8 @@ public class NewsCommentFragment extends BaseListFragment<INewsComment.Presenter
     private static final String TAG = "NewsCommentFragment";
     private String groupId;
     private String itemId;
+    EditText editText;
+    Button button;
 
     public static NewsCommentFragment newInstance(String groupId, String itemId) {
         NewsCommentFragment instance = new NewsCommentFragment();
@@ -55,6 +59,8 @@ public class NewsCommentFragment extends BaseListFragment<INewsComment.Presenter
     protected void initView(View view) {
         super.initView(view);
         Toolbar toolbar = view.findViewById(R.id.toolbar);
+        editText = view.findViewById(R.id.et);
+        button = view.findViewById(R.id.bt);
         initToolBar(toolbar, true, getString(R.string.title_comment));
         toolbar.setOnClickListener(view1 -> recyclerView.smoothScrollToPosition(0));
         toolbar.setBackgroundColor(SettingUtil.getInstance().getColor());
@@ -72,6 +78,12 @@ public class NewsCommentFragment extends BaseListFragment<INewsComment.Presenter
             }
         });
         setHasOptionsMenu(true);
+        button.setOnClickListener(v -> {
+            ((NewsCommentPresenter) presenter).setFilter(editText.getText().toString());
+            onRefresh();
+        });
+
+
     }
 
     @Override
